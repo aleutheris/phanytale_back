@@ -1,0 +1,21 @@
+# Local environment
+.venv/
+.vscode/
+.idea/
+
+# Builds
+build/
+
+# Doxygen outputs
+doxygen_output/
+doc/.directory
+
+# Local files
+*.csv
+*.ods
+*.jpg
+*.xlsx
+*.pyc
+*.json
+*.pkl
+docs.html
