@@ -9,9 +9,7 @@ PUT_SUCCESS = {'message': 'PUT request processed successfully\n', 'code': 200}
 POST_SUCCESS = {'message': 'POST request processed successfully\n', 'code': 200}
 DELETE_SUCCESS = {'message': 'DELETE request processed successfully\n', 'code': 200}
 
-users_feedbacks = {}
-users_feedbacks['user1'] = {}
-users_feedbacks['user1']['post1'] = {'score': 5, 'comments': []}
+USER_FEEDBACKS_FILE_PATH = '/data/'
 
 
 @app.route("/")
@@ -21,24 +19,44 @@ def home():
     return jsonify({"message": "Modified date: " + data['date']})
 
 
+# http://crystord:5001/api/feedbacks?useruuid=1234&posttitle="Reality Crushing Dreams"
 @app.route("/api/feedbacks", methods=["GET"])
 def get_feedbacks():
-    global users_feedbacks
-    item_useruuid = request.args.get('useruuid', 'default_type')
-    item_posttitle = request.args.get('posttitle', 'default_color')
-    return jsonify({"message": users_feedbacks[item_useruuid][item_posttitle]['score']})
+    user_uuid = request.args.get('useruuid')
+    post_title = request.args.get('posttitle')
+    data_store = get_userdata_from_file(USER_FEEDBACKS_FILE_PATH + user_uuid + '.json')
+
+    return jsonify({"message": data_store[post_title] if post_title in data_store else {}})
 
 
-# # curl -X POST -H "Content-Type: application/json" -d '{"user": "neo4j", "password": "mUN8Mer61YTsqwBwDEaAbT7b6YeBFF4-ESwv81N7iK0", "uri": "neo4j+s://91476b49.databases.neo4j.io:7687"}' http://crystord:5000/api/create_element
-# @app.route("/api/change_database", methods=["POST"])
-# def change_database():
-#     global ce
-#     data = request.get_json()
-#     user = data['user']
-#     password = data['password']
-#     uri = data['uri']
-#     ce = crystord.ElementQuerier(user, password, uri)
-#     return POST_SUCCESS['message'], POST_SUCCESS['code']
+# curl -X POST -H "Content-Type: application/json" -d '{"user_uuid": "1234", "post_title": "Reality Crushing Dreams", "score": 10}' http://crystord:5001/api/change_user_score
+@app.route("/api/change_user_score", methods=["POST"])
+def change_user_score():
+    data_income = request.get_json()
+    user_uuid = data_income['user_uuid']
+    post_title = data_income['post_title']
+    user_score = data_income['score']
+
+    file_name = USER_FEEDBACKS_FILE_PATH + user_uuid + '.json'
+    data_store = get_userdata_from_file(file_name)
+    data_store[post_title] = {'score': user_score}
+    save_userdata_to_file(file_name, data_store)
+
+    return POST_SUCCESS['message'], POST_SUCCESS['code']
+
+
+def get_userdata_from_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = {}
+    return data
+
+
+def save_userdata_to_file(file_name, data):
+    with open(file_name, 'w') as file:
+        json.dump(data, file)
 
 
 if __name__ == '__main__':

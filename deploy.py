@@ -123,7 +123,7 @@ run_command(["rm", "/home/ample/phanytale.tar"])
 run_command(["ssh", "nucubuntunl", "docker", "load", "-i", "/home/ample/phanytale.tar"])
 
 # Run the container
-run_command(["ssh", "nucubuntunl", "sudo", "docker", "run", "--name", "phanytale_api", "-d", "-p", SERVER_PORT+":"+SERVER_PORT, "phanytale:latest"])
+run_command(["ssh", "nucubuntunl", "sudo", "docker", "run", "--name", "phanytale_api", "-d", "-v", "/home/ample/phanytale_data:/data", "-p", SERVER_PORT+":"+SERVER_PORT, "phanytale:latest"])
 
 # List the docker images
 run_command(["docker", "images"])
